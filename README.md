@@ -1,4 +1,4 @@
-# AI + API - Help me find a job
+# AI + USA JOBS API
 
 This project is a template code from the https://github.com/Codebender-Bootcamp/codebender-ai-nextjs.  
 
