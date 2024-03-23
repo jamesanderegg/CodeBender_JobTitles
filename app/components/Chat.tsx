@@ -1,44 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useChat } from 'ai/react';
-import Image from 'next/image';
 
 const Chat = () => {
   const [submitType, setSubmitType] = useState<'text'|'image'>("text");
-  const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
+  
   const { messages, input, handleInputChange, handleSubmit } = useChat({
     api: '/api/openai',
   });
 
-  const getImageData = async () => {
-    try {
-      const response = await fetch('/api/dall-e', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ prompt: input })
-      });
-      const { imageUrl } = await response.json();
-      setImageUrl(imageUrl);
-      setError("");
-    } catch (e) {
-      setError(`An error occurred calling the API: ${e}`);
-    }
-    setLoading(false);
+  // Initial message definition
+  const initialMessage = {
+    id: 'initial-message',
+    content: "Hello! I am USAJOBS Bot, I can help you find a job. Do you know the location you'd like to work?",
+    role: 'assistant',
   };
+
+  // Ensure initial message is always included and not duplicated
+  const combinedMessages = [initialMessage, ...messages.filter(m => m.id !== 'initial-message')];
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    
     if (submitType === 'text') {
       handleSubmit(event);
-    } else {
-      setLoading(true);
-      setImageUrl("");
-      getImageData().then();
     }
   };
 
@@ -49,31 +34,20 @@ const Chat = () => {
     system: '#fff',
     tool: '#fff',
     data: '#fff'
-  }
+  };
 
   const renderResponse = () => {
-    if (submitType === 'text') {
-      return (
-        <div className="response">
-          {messages.length > 0
-          ? messages.map(m => (
-              <div key={m.id} className="chat-line">
-                <span style={{color: userColors[m.role]}}>{m.role === 'user' ? 'User: ' : '⚡️Last Codebender: '}</span>
-                {m.content}
-              </div>
-            ))
-          : error}
-        </div>
-      );
-    } else {
-      return (
-        <div className="response">
-          {loading && <div className="loading-spinner"></div>}
-          {imageUrl && <Image src={imageUrl} className="image-box" alt="Generated image" width="400" height="400" />}
-        </div>
-      )
-    }
-  }
+    return (
+      <div className="response">
+        {combinedMessages.map((m, index) => (
+          <div key={m.id || index} className="chat-line">
+            <span style={{color: userColors[m.role as keyof typeof userColors]}}>{m.role === 'user' ? 'User: ' : '⚡️USAJOBS Bot: '}</span>
+            {m.content}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <>
@@ -83,12 +57,9 @@ const Chat = () => {
         <button type="submit" className="mainButton" disabled={loading} onClick={() => setSubmitType('text')}>
           TEXT
         </button>
-        <button type="submit" className="secondaryButton" disabled={loading} onClick={() => setSubmitType('image')}>
-          IMAGE
-        </button>
       </form>
     </>
   );
-}
+};
 
 export default Chat;
