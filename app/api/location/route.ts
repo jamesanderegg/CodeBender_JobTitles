@@ -1,5 +1,4 @@
 import OpenAI from 'openai';
-import { OpenAIStream, StreamingTextResponse } from 'ai';
 
 // Create an OpenAI API client
 const openai = new OpenAI({
@@ -14,7 +13,7 @@ export async function POST(req: Request, res: Response) {
   const { messages } = await req.json();
   console.log('messages:', messages);
   
-  // Ask OpenAI for a streaming chat completion given the prompt
+  // Ask OpenAI for a chat completion given the prompt, waiting for the complete response
   const response = await openai.chat.completions.create({
     model: "gpt-3.5-turbo",
     messages: [
@@ -39,13 +38,15 @@ export async function POST(req: Request, res: Response) {
       },
       ...messages,
     ],
-    stream: true,
     temperature: 0.5,
+    // Note: The 'stream' parameter is omitted to get the complete response at once
   });
-  
-  
-  // Convert the response into a friendly text-stream
-  const stream = OpenAIStream(response);
-  // Respond with the stream
-  return new StreamingTextResponse(stream);
+
+  // Respond with the complete response
+  return new Response(JSON.stringify(response), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 }

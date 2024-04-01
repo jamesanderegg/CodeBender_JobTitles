@@ -4,7 +4,6 @@ import { useChat } from 'ai/react';
 const Location = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [streamCompleted, setStreamCompleted] = useState(false); // New state variable to track stream completion
 
   const { messages, input, handleInputChange, handleSubmit } = useChat({
     api: '/api/location',
@@ -12,45 +11,53 @@ const Location = () => {
 
   // Render messages (original content)
   const renderMessages = () => {
-    return messages.map((msg, index) => (
-      <div key={index} className={`message ${msg.role}`}>
-        <span>{msg.role === 'user' ? 'You: ' : 'Bot: '}</span>
-        {msg.content}
-      </div>
-    ));
-  };
-
-  // Render messages with JSON parsing
-  const renderMessages1 = () => {
+    console.log(messages)
     return messages.map((msg, index) => {
-      let contentObj;
-      try {
-        contentObj = JSON.parse(msg.content);
-      } catch (e) {
-        console.error("Error parsing message content:", e);
-        contentObj = null;
+      // Initially assume the message is just a text
+      let displayText = msg.content;
+      let confirmationFlag = false;
+  
+      // Check if the message is from the bot and try to parse the JSON content
+      if (msg.role === 'assistant') {
+        try {
+          // First, extract the 'message' attribute from the bot's response
+          const botMessage = JSON.parse(msg.content).choices[0].message.content;
+          // Now, parse the JSON content of the 'message' attribute to access its fields
+          const messageContent = JSON.parse(botMessage);
+  
+          // Extract the 'message' and 'confirmationFlag' from the parsed content
+          displayText = messageContent.message;
+          confirmationFlag = messageContent.confirmationFlag;
+        } catch (e) {
+          console.error("Error parsing message content:", e);
+          // In case of any error during parsing, use a default error message
+          displayText = "Error: Message content could not be parsed.";
+        }
       }
-
-      const displayText = contentObj ? 
-        (msg.role === 'user' ? 'You: ' : 'Bot: ') + contentObj.message : 
-        "Error: Message content could not be parsed.";
-
+  
+      // Render the extracted or default message
       return (
         <div key={index} className={`message ${msg.role}`}>
-          <span>{displayText}</span>
+          <span>{msg.role === 'user' ? 'You: ' : 'Bot: '}</span>
+          {displayText}
+          {/* Optionally, display something based on the confirmationFlag */}
+          {confirmationFlag && <div>Confirmation Received!</div>}
         </div>
       );
     });
   };
+  
+
+
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
     setError('');
-    setStreamCompleted(false); // Reset stream completion status
+    
     try {
       await handleSubmit(event); // Modify handleSubmit to update setStreamCompleted(true) when the stream is complete
-      setStreamCompleted(true); // Assume the stream is completed after handleSubmit (adjust based on actual logic)
+     
     } catch (e) {
       setError('An error occurred while submitting your location. Please try again.');
       console.error(e);
@@ -65,11 +72,7 @@ const Location = () => {
         {renderMessages()}
       </div>
       <br />
-      {streamCompleted && ( // Only render if the stream is completed
-        <div>
-          {renderMessages1()}
-        </div>
-      )}
+      
       <form onSubmit={onSubmit} className="mainForm">
         <input
           name="input-location"
