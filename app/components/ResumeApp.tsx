@@ -8,7 +8,7 @@ const ResumeApp = () => {
     const [showWorth, setShowWorth] = useState(false);
     const [isLoadingResume, setIsLoadingResume] = useState(false);
     const [resumeText, setResumeText] = useState<string>('');
-
+    const [location, setLocation] = useState<string>('');
     const { completion, isLoading, complete, error } = useCompletion({
         api: '/api/openai-resume',
       });
@@ -22,6 +22,8 @@ const ResumeApp = () => {
           complete(messageToSend);
           setShowWorth(true);
           setIsLoadingResume(false);
+
+          console.log(completion)
         };
     
         if (resumeText !== '') {
@@ -29,6 +31,7 @@ const ResumeApp = () => {
         }
       }, [resumeText]);
    
+      
     return(
         <>
         
@@ -43,8 +46,9 @@ const ResumeApp = () => {
         </div>
       ) : (
      <>
-        <ResumeWorth resumeWorth={completion} />
-        <ResumeTitles resumeTitles={completion} />
+        <ResumeWorth resumeWorth={completion} setLocation={setLocation} />
+        <p>{location}</p>
+        <ResumeTitles resumeTitles={completion} location={location} />
         </>
       )}
       {error && <p>{error.message}</p>}

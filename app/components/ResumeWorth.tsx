@@ -3,9 +3,10 @@ import styles from '../styles/ResumeWorth.module.css';
 
 interface ResumeWorthProps {
   resumeWorth: string;
+  setLocation: (location: string) => void;
 }
 
-const ResumeWorth: React.FC<ResumeWorthProps> = ({ resumeWorth }) => {
+const ResumeWorth: React.FC<ResumeWorthProps> = ({ resumeWorth, setLocation }) => {
   const completion = JSON.parse(resumeWorth.toString());
  console.log(completion)
   // Extract the estimated worth, explanation, and improvements from the analysis result
@@ -15,6 +16,7 @@ const ResumeWorth: React.FC<ResumeWorthProps> = ({ resumeWorth }) => {
   const improvements = completion.estimatedWorth.explanation.positives; 
   const estimatedWorth = estimatedWorthMatch ? estimatedWorthMatch : 'N/A'; // Simplified this line
 
+  setLocation(completion.location)
 
   return (
     <div className={styles.container}>

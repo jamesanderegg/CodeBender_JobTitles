@@ -57,7 +57,7 @@ export async function POST(req: Request) {
           }
           ${prompt}
           
-          Output:\n`,
+          Output:`,
         },
       ],
     });
