@@ -4,6 +4,7 @@ import Chat from './components/Chat';
 import Location from './components/Location';
 import ResumeApp from './components/ResumeApp';
 
+
 export default function Home() {
   return (
     <main className="App">

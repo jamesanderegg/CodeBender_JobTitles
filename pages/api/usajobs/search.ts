@@ -2,16 +2,25 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 interface JobListing {
   JobTitle: string;
-  // Add other fields as needed
+  MinimumAmount: string;
+  MaximumAmount: string;
+  Location: string;
+  DatePosted: string;
+  PositionStartDate: string;
+  PositionEndDate: string;
+  ApplicationCloseDate: string;
+  OrganizationName: string;
+  DepartmentName: string;
+  PositionURI: string;
+  QualificationSummary: string;
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse<JobListing[] | { message: string }>) {
   const positionTitle = typeof req.query.jobTitle === 'string' ? req.query.jobTitle : '';
   const locationName = `${typeof req.query.city === 'string' ? req.query.city : ''}, ${typeof req.query.state === 'string' ? req.query.state : ''}`;
-  const datePosted = '60'; // Last 60 days
 
-  const apiUrl = `https://data.usajobs.gov/api/Search?PositionTitle=${encodeURIComponent(positionTitle)}&LocationName=${encodeURIComponent(locationName)}&DatePosted=${datePosted}`;
-  console.log(apiUrl)
+  const apiUrl = `https://data.usajobs.gov/api/Search?PositionTitle=${encodeURIComponent(positionTitle)}&LocationName=${encodeURIComponent(locationName)}&DatePosted=60&RemoteIndicator=False`;
+  console.log(apiUrl);
   const headers: Record<string, string> = {
     'Host': 'data.usajobs.gov',
   };
@@ -31,11 +40,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const data = await apiResponse.json();
 
-    
     const jobListings: JobListing[] = data.SearchResult.SearchResultItems.map((item: any) => ({
       JobTitle: item.MatchedObjectDescriptor.PositionTitle,
-      
-      // Map other fields as needed
+      MinimumAmount: item.MatchedObjectDescriptor.PositionRemuneration[0]?.MinimumRange || '',
+      MaximumAmount: item.MatchedObjectDescriptor.PositionRemuneration[0]?.MaximumRange || '',
+      Location: item.MatchedObjectDescriptor.PositionLocationDisplay|| '',
+      DatePosted: item.MatchedObjectDescriptor.PublicationStartDate,
+      PositionStartDate: item.MatchedObjectDescriptor.PositionStartDate,
+      PositionEndDate: item.MatchedObjectDescriptor.PositionEndDate,
+      ApplicationCloseDate: item.MatchedObjectDescriptor.ApplicationCloseDate,
+      OrganizationName: item.MatchedObjectDescriptor.OrganizationName,
+      DepartmentName: item.MatchedObjectDescriptor.DepartmentName,
+      PositionURI: item.MatchedObjectDescriptor.PositionURI,
+      QualificationSummary: item.MatchedObjectDescriptor.QualificationSummary,
     }));
 
     res.status(200).json(jobListings);
