@@ -79,7 +79,7 @@ const ResumeTitles: React.FC<ResumeTitlesProps> = ({ resumeTitles, location, set
 
   return (
     <div className={styles.container}>
-      <p className={styles.subtitle}>Click a job title to search. Clicked titles won't be searched again.</p>
+      <p className={styles.subtitle}>Click a job title to search. Clicked titles will not be searched again.</p>
       {Array.isArray(jobTitles) && (
         <div className={styles.grid}>
           {jobTitles.map((item, index) => (
