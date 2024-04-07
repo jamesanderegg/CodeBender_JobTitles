@@ -5,7 +5,7 @@
   }
   
   .subtitle {
-    margin-bottom: 32px;
+    
     text-align: center;
   }
   
@@ -70,6 +70,16 @@
     position: absolute;
     left: 0;
     top: -5px;
+  }
+
+  .nextButton{
+    background-color: #e02aff;
+    color: white;
+    border-width: 0;
+    padding-inline: 0;
+    padding: 15px;
+    border-radius: 10px;
+    margin: auto;
   }
   
   @media screen and (max-width: 768px) {

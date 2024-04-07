@@ -5,7 +5,7 @@ import ResumeTitles from './ResumeTitles';
 import JobsDashboard from './JobsDashboard';
 import { useCompletion } from 'ai/react';
 import { JobData } from './types'; // Adjust the path as necessary
-import styles from '../styles/Home.module.css';
+
 
 const ResumeApp = () => {
     const [showWorth, setShowWorth] = useState(false);
@@ -13,6 +13,9 @@ const ResumeApp = () => {
     const [resumeText, setResumeText] = useState<string>('');
     const [location, setLocation] = useState<string>('');
     const [jobsData, setJobsData] = useState<JobData[]>([]); 
+
+    const [showJobTitleSection, setShowJobTitleSection] = useState(false); // 
+
     const { completion, isLoading, complete, error } = useCompletion({
         api: '/api/openai-resume',
       });
@@ -45,7 +48,7 @@ const addJobsData = (newData: JobData[]) => {
         
         {!showWorth ? (
         <div >
-          <p>Upload your resume to know your worth.</p>
+          <p>Let your resume guide you. Upload your resume to know your worth.</p>
           <ResumeUploader setIsLoading={setIsLoadingResume} setResumeText={setResumeText} />
           {(isLoadingResume || isLoading) && 
             <div>
@@ -54,9 +57,14 @@ const addJobsData = (newData: JobData[]) => {
         </div>
       ) : (
      <>
-        <ResumeWorth resumeWorth={completion} setLocation={setLocation} />
-        <p>{location}</p>
-        <ResumeTitles resumeTitles={completion} location={location} setJobsData={addJobsData} />
+        <ResumeWorth resumeWorth={completion} setLocation={setLocation} showJobTitleSection={showJobTitleSection} setShowJobTitleSection={setShowJobTitleSection}/>
+        
+        {showJobTitleSection && (
+          <div>
+            <p>{location}</p>
+            <ResumeTitles resumeTitles={completion} location={location} setJobsData={addJobsData} />
+          </div>
+         )}
         </>
       )}
       {error && <p>{error.message}</p>}
